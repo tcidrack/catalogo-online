@@ -1,0 +1,14 @@
+# Node
+node_modules/
+dist/
+
+# Env
+.env
+
+# Planilhas
+*.xlsx
+*.xls
+
+# Temporários Excel
+~$*
+.~lock.*
