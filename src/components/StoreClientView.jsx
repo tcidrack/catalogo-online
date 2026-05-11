@@ -8,9 +8,11 @@ import styles from './StoreClientView.module.css'
 
 export default function StoreClientView({ loja }) {
   const { produtos, config, loading, error } = useCatalogo(loja.id)
-  const [filter, setFilter] = useState('all')
+  const [activeCategory, setActiveCategory] = useState('all')
   const [selectedProduto, setSelectedProduto] = useState(null)
-  const [dynamicFilters, setDynamicFilters] = useState([
+  const [searchTerm, setSearchTerm] = useState('')
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [categories, setCategories] = useState([
     { label: 'Todos', value: 'all' },
     { label: '🏷 Promoções', value: 'promo' },
   ])
@@ -22,7 +24,7 @@ export default function StoreClientView({ loja }) {
         label: cat,
         value: cat
       }))
-      setDynamicFilters([
+      setCategories([
         { label: 'Todos', value: 'all' },
         ...categoryFilters,
         { label: '🏷 Promoções', value: 'promo' },
@@ -82,10 +84,12 @@ export default function StoreClientView({ loja }) {
 
   const filtered = produtos.filter(p => {
     if (!p.disponivel) return false
-    // Keep out-of-stock products visible if admin wants to show quantities
-    if (filter === 'promo') return p.em_promocao
-    if (filter === 'all') return true
-    return p.categoria === filter
+    if (activeCategory === 'promo') return p.em_promocao
+    if (activeCategory === 'all') return true
+    return p.categoria === activeCategory
+  }).filter(p => {
+    if (!searchTerm) return true
+    return p.nome.toLowerCase().includes(searchTerm.toLowerCase())
   })
 
   return (
@@ -113,18 +117,50 @@ export default function StoreClientView({ loja }) {
         </div>
       )}
 
-      <div className={styles.filters}>
-        <span className={styles.filterLabel}>Ver:</span>
-        {dynamicFilters.map(f => (
-          <button
-            key={f.value}
-            className={`${styles.filterBtn} ${filter === f.value ? styles.active : ''}`}
-            onClick={() => setFilter(f.value)}
-          >
-            {f.label}
-          </button>
-        ))}
+      <div className={styles.toolbar}>
+        <button className={styles.hamburgerBtn} onClick={() => setMenuOpen(true)} aria-label="Abrir categorias">
+          <span className={styles.hamburgerLine} />
+          <span className={styles.hamburgerLine} />
+          <span className={styles.hamburgerLine} />
+        </button>
+        <div className={styles.searchWrap}>
+          <span className={styles.searchIcon}>🔍</span>
+          <input
+            type="text"
+            className={styles.searchInput}
+            placeholder="Buscar produtos..."
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+          />
+          {searchTerm && (
+            <button className={styles.clearSearch} onClick={() => setSearchTerm('')}>✕</button>
+          )}
+        </div>
       </div>
+
+      {menuOpen && (
+        <div className={styles.drawerOverlay} onClick={() => setMenuOpen(false)} />
+      )}
+      <aside className={`${styles.drawer} ${menuOpen ? styles.drawerOpen : ''}`}>
+        <div className={styles.drawerHeader}>
+          <h3>Categorias</h3>
+          <button className={styles.drawerClose} onClick={() => setMenuOpen(false)}>✕</button>
+        </div>
+        <nav className={styles.drawerNav}>
+          {categories.map(cat => (
+            <button
+              key={cat.value}
+              className={`${styles.drawerItem} ${activeCategory === cat.value ? styles.drawerActive : ''}`}
+              onClick={() => {
+                setActiveCategory(cat.value)
+                setMenuOpen(false)
+              }}
+            >
+              {cat.label}
+            </button>
+          ))}
+        </nav>
+      </aside>
 
       <div className={styles.grid}>
         {filtered.length === 0 ? (
