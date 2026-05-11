@@ -9,7 +9,7 @@ import styles from './SuperAdminPage.module.css'
 export default function SuperAdminPage() {
   const navigate = useNavigate()
   const { isAuthenticated, loading, login, logout } = useSuperAdminAuth()
-  const { lojas, loading: lojasLoading, createLoja, deleteLoja, toggleAtivo, reload } = useLojas()
+  const { lojas, loading: lojasLoading, createLoja, toggleAtivo, reload } = useLojas()
   const [password, setPassword] = useState('')
   const [authError, setAuthError] = useState('')
   const [newStoreName, setNewStoreName] = useState('')
@@ -89,11 +89,15 @@ export default function SuperAdminPage() {
     }
   }
 
-  const handleDelete = async (id, nome) => {
+  const handleDelete = async (id, nome, slug) => {
     if (!confirm(`Remover a loja "${nome}"?`)) return
     try {
-      await deleteLoja(id)
+      const { error } = await supabase.functions.invoke('delete-store', {
+        body: { lojaId: id, slug }
+      })
+      if (error) throw error
       setMessage(`Loja "${nome}" removida`)
+      reload()
     } catch (err) {
       setMessage('Erro: ' + err.message)
     }
@@ -179,30 +183,34 @@ export default function SuperAdminPage() {
                       <small>Slug: {loja.slug}</small>
                     </div>
                     <div className={styles.storeActions}>
-                      <button
-                        className={styles.actionBtn}
-                        onClick={() => { copiar(clientUrl); setMessage('Link copiado!'); setTimeout(() => setMessage(''), 2000) }}
-                      >
-                        Copiar Link Cliente
-                      </button>
-                      <button
-                        className={styles.actionBtn}
-                        onClick={() => { copiar(adminUrl); setMessage('Link copiado!'); setTimeout(() => setMessage(''), 2000) }}
-                      >
-                        Copiar Link Admin
-                      </button>
-                      <button
-                        className={`${styles.actionBtn} ${loja.ativo ? styles.warning : styles.success}`}
-                        onClick={() => toggleAtivo(loja.id, loja.ativo)}
-                      >
-                        {loja.ativo ? 'Desativar' : 'Ativar'}
-                      </button>
-                      <button
-                        className={styles.deleteBtn}
-                        onClick={() => handleDelete(loja.id, loja.nome)}
-                      >
-                        Remover
-                      </button>
+                      <div className={styles.actionRowCopy}>
+                        <button
+                          className={styles.actionBtn}
+                          onClick={() => { copiar(clientUrl); setMessage('Link copiado!'); setTimeout(() => setMessage(''), 2000) }}
+                        >
+                          Copiar Link Cliente
+                        </button>
+                        <button
+                          className={styles.actionBtn}
+                          onClick={() => { copiar(adminUrl); setMessage('Link copiado!'); setTimeout(() => setMessage(''), 2000) }}
+                        >
+                          Copiar Link Admin
+                        </button>
+                      </div>
+                      <div className={styles.actionRowManage}>
+                        <button
+                          className={`${styles.actionBtn} ${loja.ativo ? styles.warning : styles.success}`}
+                          onClick={() => toggleAtivo(loja.id, loja.ativo)}
+                        >
+                          {loja.ativo ? 'Desativar' : 'Ativar'}
+                        </button>
+                        <button
+                          className={styles.deleteBtn}
+                          onClick={() => handleDelete(loja.id, loja.nome, loja.slug)}
+                        >
+                          Remover
+                        </button>
+                      </div>
                     </div>
                   </div>
                 )

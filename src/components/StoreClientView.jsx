@@ -93,7 +93,7 @@ export default function StoreClientView({ loja }) {
       <header className={styles.header}>
         <div className={styles.hero}>
           {config?.logo_url && (
-            <img src={config.logo_url} alt="Logo" style={{ height: '80px', objectFit: 'contain', marginBottom: '1rem' }} />
+            <img src={config.logo_url} alt="Logo" style={{ height: '80px', maxWidth: '100%', objectFit: 'contain', marginBottom: '1rem' }} />
           )}
           <h1 className={styles.heroTitle}>{config?.nome || loja.nome}</h1>
           <p className={styles.heroSub}>{config?.slogan || 'Acessórios & Semijoias'}</p>

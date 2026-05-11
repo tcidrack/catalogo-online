@@ -157,6 +157,13 @@
 
 .storeActions {
   display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.actionRowCopy,
+.actionRowManage {
+  display: flex;
   gap: 0.5rem;
   flex-wrap: wrap;
 }
@@ -306,7 +313,17 @@
   }
 
   .storeActions {
-    justify-content: center;
+    width: 100%;
+  }
+
+  .actionRowCopy,
+  .actionRowManage {
+    width: 100%;
+  }
+
+  .actionRowCopy button,
+  .actionRowManage button {
+    flex: 1;
   }
 
   .authBox {
