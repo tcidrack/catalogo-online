@@ -7,7 +7,7 @@ import { linkAdmin } from '../utils/storeLinks'
 import styles from './StoreClientView.module.css'
 
 export default function StoreClientView({ loja }) {
-  const { produtos, config, loading, error } = useCatalogo(loja.id)
+  const { produtos, config, loading, error, reload } = useCatalogo(loja.id)
   const [activeCategory, setActiveCategory] = useState('all')
   const [selectedProduto, setSelectedProduto] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
@@ -62,10 +62,16 @@ export default function StoreClientView({ loja }) {
     document.documentElement.style.setProperty('--text-light', '#666')
   }, [config])
 
+  useEffect(() => {
+    if (!loja?.id) return
+    const interval = setInterval(() => reload(true), 30000)
+    return () => clearInterval(interval)
+  }, [loja?.id, reload])
+
   if (loading) {
     return (
       <div className={styles.loading}>
-        <div className={styles.loadingDiamond}>💎</div>
+         <div className={styles.loadingDiamond} />
         <div className={styles.loadingTitle}>{config?.nome || 'Carregando...'}</div>
         <div className={styles.loadingSub}>Carregando catálogo...</div>
       </div>

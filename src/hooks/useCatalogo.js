@@ -28,14 +28,14 @@ export function useCatalogo(lojaId, options = {}) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
 
-  const loadAll = useCallback(async () => {
+  const loadAll = useCallback(async (skipLoading = false) => {
     if (!lojaId) {
-      setLoading(false)
-      setError(null)
+      if (!skipLoading) setLoading(false)
+      if (!skipLoading) setError(null)
       return
     }
-    setLoading(true)
-    setError(null)
+    if (!skipLoading) setLoading(true)
+    if (!skipLoading) setError(null)
     try {
       const timeoutPromise = new Promise((_, reject) =>
         setTimeout(() => reject(new Error('Timeout ao carregar dados')), TIMEOUT_MS)

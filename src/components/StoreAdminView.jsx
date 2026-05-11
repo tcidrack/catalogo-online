@@ -117,7 +117,7 @@ export default function StoreAdminView({ loja }) {
   if (authLoading) {
     return (
       <div className={styles.loading}>
-        <div className={styles.loadingDiamond}>&#x1F48E;</div>
+        <div className={styles.loadingDiamond} />
         <div>Verificando permissões...</div>
       </div>
     )
@@ -397,7 +397,7 @@ export default function StoreAdminView({ loja }) {
             <input className={styles.input} value={localConfig.slogan || ''} onChange={(e) => handleConfigChange('slogan', e.target.value)} />
           </div>
           <div className={styles.configCard}>
-            <label className={styles.label}>WhatsApp (com DDD)</label>
+            <label className={styles.label}>WhatsApp (apenas DDD + número)</label>
             <input className={styles.input} placeholder="85999999999" value={localConfig.whatsapp || ''} onChange={(e) => handleConfigChange('whatsapp', e.target.value)} />
           </div>
           <div className={styles.configCard}>
@@ -437,35 +437,35 @@ export default function StoreAdminView({ loja }) {
             <label className={styles.label}>Cor principal</label>
             <div className={styles.colorRow}>
               <input type="color" value={localConfig.cor_principal || '#C9A84C'} onChange={(e) => handleConfigChange('cor_principal', e.target.value)} className={styles.colorInput} />
-              <span className={styles.colorHex}>{localConfig.cor_principal || '#C9A84C'}</span>
+              <input type="text" className={styles.colorHexInput} value={localConfig.cor_principal || '#C9A84C'} onChange={(e) => { const raw = e.target.value; if (/^#[0-9a-fA-F]{0,6}$/.test(raw)) handleConfigChange('cor_principal', raw) }} maxLength={7} />
             </div>
           </div>
           <div className={styles.configCard}>
             <label className={styles.label}>Cor de destaque</label>
             <div className={styles.colorRow}>
               <input type="color" value={localConfig.cor_destaque || '#C47B82'} onChange={(e) => handleConfigChange('cor_destaque', e.target.value)} className={styles.colorInput} />
-              <span className={styles.colorHex}>{localConfig.cor_destaque || '#C47B82'}</span>
+              <input type="text" className={styles.colorHexInput} value={localConfig.cor_destaque || '#C47B82'} onChange={(e) => { const raw = e.target.value; if (/^#[0-9a-fA-F]{0,6}$/.test(raw)) handleConfigChange('cor_destaque', raw) }} maxLength={7} />
             </div>
           </div>
           <div className={styles.configCard}>
             <label className={styles.label}>Cor do Topo</label>
             <div className={styles.colorRow}>
               <input type="color" value={localConfig.cor_topo || '#1a1a2e'} onChange={(e) => handleConfigChange('cor_topo', e.target.value)} className={styles.colorInput} />
-              <span className={styles.colorHex}>{localConfig.cor_topo || '#1a1a2e'}</span>
+              <input type="text" className={styles.colorHexInput} value={localConfig.cor_topo || '#1a1a2e'} onChange={(e) => { const raw = e.target.value; if (/^#[0-9a-fA-F]{0,6}$/.test(raw)) handleConfigChange('cor_topo', raw) }} maxLength={7} />
             </div>
           </div>
           <div className={styles.configCard}>
             <label className={styles.label}>Cor do Rodapé</label>
             <div className={styles.colorRow}>
               <input type="color" value={localConfig.cor_rodape || '#1a1a2e'} onChange={(e) => handleConfigChange('cor_rodape', e.target.value)} className={styles.colorInput} />
-              <span className={styles.colorHex}>{localConfig.cor_rodape || '#1a1a2e'}</span>
+              <input type="text" className={styles.colorHexInput} value={localConfig.cor_rodape || '#1a1a2e'} onChange={(e) => { const raw = e.target.value; if (/^#[0-9a-fA-F]{0,6}$/.test(raw)) handleConfigChange('cor_rodape', raw) }} maxLength={7} />
             </div>
           </div>
           <div className={styles.configCard}>
             <label className={styles.label}>Cor de Fundo</label>
             <div className={styles.colorRow}>
               <input type="color" value={localConfig.cor_fundo || '#fafafa'} onChange={(e) => handleConfigChange('cor_fundo', e.target.value)} className={styles.colorInput} />
-              <span className={styles.colorHex}>{localConfig.cor_fundo || '#fafafa'}</span>
+              <input type="text" className={styles.colorHexInput} value={localConfig.cor_fundo || '#fafafa'} onChange={(e) => { const raw = e.target.value; if (/^#[0-9a-fA-F]{0,6}$/.test(raw)) handleConfigChange('cor_fundo', raw) }} maxLength={7} />
             </div>
           </div>
           <div className={styles.configCard}>
@@ -662,7 +662,7 @@ export default function StoreAdminView({ loja }) {
                 onChange={(e) => handleConfigChange('promo_cor', e.target.value)}
                 className={styles.colorInput}
               />
-              <span className={styles.colorHex}>{localConfig.promo_cor || '#4caf50'}</span>
+              <input type="text" className={styles.colorHexInput} value={localConfig.promo_cor || '#4caf50'} onChange={(e) => { const raw = e.target.value; if (/^#[0-9a-fA-F]{0,6}$/.test(raw)) handleConfigChange('promo_cor', raw) }} maxLength={7} />
             </div>
           </div>
         </div>
@@ -679,7 +679,7 @@ export default function StoreAdminView({ loja }) {
                 onChange={(e) => handleConfigChange('promo_badge_cor', e.target.value)}
                 className={styles.colorInput}
               />
-              <span className={styles.colorHex}>{localConfig.promo_badge_cor || '#FA098A'}</span>
+              <input type="text" className={styles.colorHexInput} value={localConfig.promo_badge_cor || '#FA098A'} onChange={(e) => { const raw = e.target.value; if (/^#[0-9a-fA-F]{0,6}$/.test(raw)) handleConfigChange('promo_badge_cor', raw) }} maxLength={7} />
             </div>
             <small style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.8rem' }}>
               Esta cor será aplicada no selo de desconto dos produtos em promoção.

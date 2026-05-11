@@ -54,7 +54,7 @@ export default function AdminPage() {
   if (loading) {
     return (
       <div className={styles.loading}>
-        <div className={styles.loadingDiamond}>&#x1F48E;</div>
+        <div className={styles.loadingDiamond} />
         <div>Carregando...</div>
       </div>
     )

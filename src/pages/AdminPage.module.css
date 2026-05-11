@@ -11,13 +11,17 @@
 }
 
 .loadingDiamond {
-  font-size: 4rem;
-  animation: pulse 1.5s ease-in-out infinite;
+  width: 48px;
+  height: 48px;
+  border: 4px solid rgba(255,255,255,0.15);
+  border-top-color: #C9A84C;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  margin-bottom: 1rem;
 }
 
-@keyframes pulse {
-  0%, 100% { opacity: 0.5; transform: scale(1); }
-  50% { opacity: 1; transform: scale(1.1); }
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 .error {

@@ -11,7 +11,9 @@ export default function Modal({ produto, whatsapp, whatsappMsgPrefix, onClose })
     if (isOutOfStock) return  // Don't allow purchase if out of stock
     const prefix = whatsappMsgPrefix || 'Olá! Gostaria de saber mais sobre:'
     const msg = encodeURIComponent(`${prefix} ${produto.nome}`)
-    window.open(`https://wa.me/${whatsapp.replace(/\D/g,'')}?text=${msg}`, '_blank')
+    const cleaned = whatsapp.replace(/\D/g,'')
+    const full = cleaned.startsWith('55') ? cleaned : '55' + cleaned
+    window.open(`https://wa.me/${full}?text=${msg}`, '_blank')
   }
 
   return (
