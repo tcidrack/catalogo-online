@@ -8,45 +8,171 @@ import { useCatalogo } from '../hooks/useCatalogo'
 import { linkCliente } from '../utils/storeLinks'
 import styles from './StoreAdminView.module.css'
 
-const formatPrice = (price) => {
-  if (!price && price !== 0) return ''
-  const num = parseFloat(price.toString().replace(',', '.'))
-  if (isNaN(num)) return ''
-  return num.toLocaleString('pt-BR', { 
-    style: 'currency',
-    currency: 'BRL',
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2 
-  })
+// ── Icons ────────────────────────────────────────────────────────────────────
+const Icon = {
+  back: (
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" width="14" height="14">
+      <path d="M10 3L5 8l5 5" />
+    </svg>
+  ),
+  logout: (
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" width="14" height="14">
+      <path d="M6 3H3v10h3M10 5l3 3-3 3M13 8H6" />
+    </svg>
+  ),
+  store: (
+    <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" width="18" height="18">
+      <path d="M2 7h14M3 7V15h12V7M6 7V4a3 3 0 016 0v3" />
+    </svg>
+  ),
+  palette: (
+    <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" width="18" height="18">
+      <circle cx="9" cy="9" r="7" /><circle cx="6" cy="7" r="1.2" fill="currentColor" stroke="none" /><circle cx="12" cy="7" r="1.2" fill="currentColor" stroke="none" /><circle cx="9" cy="12" r="1.2" fill="currentColor" stroke="none" />
+    </svg>
+  ),
+  lock: (
+    <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" width="18" height="18">
+      <rect x="3" y="8" width="12" height="9" rx="2" /><path d="M6 8V5a3 3 0 016 0v3" />
+    </svg>
+  ),
+  tag: (
+    <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" width="18" height="18">
+      <path d="M2 9.5L9 2.5h6.5V9L9.5 15.5a1 1 0 01-1.4 0L2 9.5z" /><circle cx="13" cy="5" r="1" fill="currentColor" stroke="none" />
+    </svg>
+  ),
+  promo: (
+    <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" width="18" height="18">
+      <path d="M3 3h12v3L9 12 3 6V3z" /><path d="M9 12v3" />
+    </svg>
+  ),
+  box: (
+    <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" width="18" height="18">
+      <path d="M9 2L2 5.5v7L9 16l7-3.5v-7L9 2z" /><path d="M9 2v14M2 5.5l7 3.5 7-3.5" />
+    </svg>
+  ),
+  plus: (
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" width="15" height="15">
+      <path d="M8 3v10M3 8h10" />
+    </svg>
+  ),
+  image: (
+    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="20" height="20">
+      <rect x="3" y="3" width="14" height="14" rx="2" /><circle cx="8" cy="8" r="2" /><path d="M3 14l4-4 3 3 2-2 5 5" />
+    </svg>
+  ),
+  camera: (
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" width="16" height="16">
+      <path d="M1 5.5A1.5 1.5 0 012.5 4h.879L4.5 2.5h7L12.621 4H13.5A1.5 1.5 0 0115 5.5v7A1.5 1.5 0 0113.5 14h-11A1.5 1.5 0 011 12.5z" />
+      <circle cx="8" cy="9" r="2.5" />
+    </svg>
+  ),
+  upload: (
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" width="15" height="15">
+      <path d="M8 10V3M5 6l3-3 3 3" /><path d="M3 13h10" />
+    </svg>
+  ),
+  trash: (
+    <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" width="13" height="13">
+      <path d="M2 3.5h10M5 3.5V2.5a.5.5 0 01.5-.5h3a.5.5 0 01.5.5v1M4.5 3.5l.5 8h4l.5-8" />
+    </svg>
+  ),
+  save: (
+    <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" width="17" height="17">
+      <path d="M14 14H4a1 1 0 01-1-1V4l3-3h7a1 1 0 011 1v11a1 1 0 01-1 1z" /><path d="M7 14V9h4v5M6 1v4h6" />
+    </svg>
+  ),
+  check: (
+    <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" width="11" height="11">
+      <path d="M2 6l3 3 5-5" />
+    </svg>
+  ),
+  key: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="24" height="24">
+      <circle cx="7.5" cy="15.5" r="5.5" /><path d="M21 2l-9.6 9.6M15.5 7.5l2 2" />
+    </svg>
+  ),
+  wave: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" width="22" height="22">
+      <path d="M7 11.5C7 9.5 8.5 8 10.5 8s3.5 1.5 3.5 3.5-1.5 3.5-3.5 3.5" /><path d="M3.5 7C3.5 4.5 6.5 2 10.5 2s7 2.5 7 5.5M14.5 17C14.5 19.5 12 22 10.5 22" /><path d="M17.5 13c1.5-1 2.5-2.5 2.5-4.5" />
+    </svg>
+  ),
 }
 
-const formatInputPrice = (price) => {
-  if (!price && price !== 0) return ''
-  const num = parseFloat(price.toString().replace(',', '.'))
-  if (isNaN(num)) return ''
-  return num.toFixed(2).replace('.', ',')
+// ── Helpers ───────────────────────────────────────────────────────────────────
+const FONTS = [
+  { value: 'Arial, sans-serif',              label: 'Arial' },
+  { value: 'Helvetica, sans-serif',          label: 'Helvetica' },
+  { value: 'Georgia, serif',                 label: 'Georgia' },
+  { value: "'Times New Roman', serif",       label: 'Times New Roman' },
+  { value: 'Verdana, sans-serif',            label: 'Verdana' },
+  { value: "'Trebuchet MS', sans-serif",     label: 'Trebuchet MS' },
+  { value: "Palatino, serif",                label: 'Palatino' },
+  { value: "Garamond, serif",                label: 'Garamond' },
+  { value: "'Open Sans', sans-serif",        label: 'Open Sans' },
+  { value: "'Roboto', sans-serif",           label: 'Roboto' },
+  { value: "'Lato', sans-serif",             label: 'Lato' },
+  { value: "'Montserrat', sans-serif",       label: 'Montserrat' },
+  { value: "'Poppins', sans-serif",          label: 'Poppins' },
+]
+
+function ColorField({ label, configKey, value, onChange }) {
+  return (
+    <div className={styles.configCard}>
+      <label className={styles.label}>{label}</label>
+      <div className={styles.colorRow}>
+        <div className={styles.colorSwatch}>
+          <div className={styles.colorPreview} style={{ background: value }} />
+          <input
+            type="color"
+            className={styles.colorInput}
+            value={value}
+            onChange={e => onChange(configKey, e.target.value)}
+            title={`Escolher ${label}`}
+          />
+        </div>
+        <input
+          type="text"
+          className={styles.colorHexInput}
+          value={value}
+          onChange={e => { if (/^#[0-9a-fA-F]{0,6}$/.test(e.target.value)) onChange(configKey, e.target.value) }}
+          maxLength={7}
+          spellCheck={false}
+        />
+      </div>
+    </div>
+  )
 }
 
+// ── Drag handle ───────────────────────────────────────────────────────────────
+function DragHandle({ listeners }) {
+  return (
+    <div {...listeners} className={styles.dragHandle} title="Arrastar para reordenar" aria-label="Reordenar produto">
+      <div className={styles.dragDot}><span/><span/></div>
+      <div className={styles.dragDot}><span/><span/></div>
+      <div className={styles.dragDot}><span/><span/></div>
+    </div>
+  )
+}
+
+// ── Sortable row ──────────────────────────────────────────────────────────────
 function SortableProductRow({ id, children }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id })
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
-  }
   return (
-    <div ref={setNodeRef} style={style} {...attributes}>
+    <div
+      ref={setNodeRef}
+      style={{ transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1 }}
+      {...attributes}
+    >
       {children(listeners)}
     </div>
   )
 }
 
+// ── Main component ─────────────────────────────────────────────────────────────
 export default function StoreAdminView({ loja }) {
-  // ALL HOOKS AT THE TOP - always in same order
   const { isAuthenticated, loading: authLoading, storeVerified, login, logout } = useStoreAdminAuth(loja.slug)
-  
   const { produtos, config, loading: catalogLoading, error, saveConfig, addProduto, updateProduto, deleteProduto, uploadImagem, updateCategorias, reorderProdutos } = useCatalogo(loja?.id)
-  
+
   const [password, setPassword] = useState('')
   const [authError, setAuthError] = useState('')
   const [settingPassword, setSettingPassword] = useState(false)
@@ -61,174 +187,149 @@ export default function StoreAdminView({ loja }) {
   const [localConfig, setLocalConfig] = useState({})
   const [saving, setSaving] = useState(false)
   const [saveMsg, setSaveMsg] = useState('')
+  const [saveMsgType, setSaveMsgType] = useState('ok')
   const [addingProduct, setAddingProduct] = useState(false)
   const [uploadingId, setUploadingId] = useState(null)
   const [localProducts, setLocalProducts] = useState([])
   const fileInputRef = useRef(null)
   const pendingUploadId = useRef(null)
   const newProductIdsRef = useRef(new Set())
-  const productListRef = useRef(null)
   const [showOnboarding, setShowOnboarding] = useState(() => !localStorage.getItem('admin_onboarding_seen'))
+
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
     useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 5 } })
   )
 
-  // ALL useEffect HOOKS MUST BE HERE, BEFORE ANY RETURNS
-  useEffect(() => {
-    if (config) setLocalConfig(config)
-  }, [config])
+  useEffect(() => { if (config) setLocalConfig(config) }, [config])
 
   useEffect(() => {
     if (!produtos) return
     setLocalProducts(prev => {
-      if (prev.length === produtos.length && prev.every((p, i) => p.id === produtos[i].id)) {
-        return prev
-      }
+      if (prev.length === produtos.length && prev.every((p, i) => p.id === produtos[i].id)) return prev
       return produtos
     })
   }, [loja?.id, produtos])
 
   useEffect(() => {
     if (config && !categoriasInitialized.current) {
-      if (config.categorias && Array.isArray(config.categorias) && config.categorias.length >0) {
+      if (config.categorias && Array.isArray(config.categorias) && config.categorias.length > 0) {
         setCategorias(config.categorias)
       } else {
-        const defaultCats = ['Aneis', 'Colares', 'Brincos', 'Pulseiras', 'Outros']
-        setCategorias(defaultCats)
-        if (config.id) {
-          updateCategorias(defaultCats).catch(e => console.error('Failed to save default categories:', e))
-        }
+        const def = ['Aneis', 'Colares', 'Brincos', 'Pulseiras', 'Outros']
+        setCategorias(def)
+        if (config.id) updateCategorias(def).catch(console.error)
       }
       categoriasInitialized.current = true
     }
   }, [config])
 
   useEffect(() => {
-    if (!settingPassword) {
-      setNewPassword('')
-      setConfirmPassword('')
-      setPasswordMsg('')
-    }
+    if (!settingPassword) { setNewPassword(''); setConfirmPassword(''); setPasswordMsg('') }
   }, [settingPassword])
 
-  // NOW the conditional returns
-  // Exibir loading enquanto verifica autenticação
+  // ── Auth loading/error states
   if (authLoading) {
     return (
       <div className={styles.loading}>
-        <div className={styles.loadingDiamond} />
-        <div>Verificando permissões...</div>
+        <div className={styles.loadingSpinner} />
+        <span>Verificando permissões...</span>
       </div>
     )
   }
 
-  // Se autenticado mas não é dono da loja
   if (!storeVerified && isAuthenticated) {
     return (
       <div className={styles.error}>
         <h2>Acesso não autorizado</h2>
         <p>Você não tem permissão para acessar esta loja.</p>
-        <button onClick={logout} className={styles.logoutBtn}>Sair</button>
+        <button onClick={logout} className={styles.inlineBtn} style={{ marginTop: '1rem' }}>Sair</button>
       </div>
     )
   }
 
   const handleLogin = async (e) => {
     e.preventDefault()
-    const success = await login(password)
-    if (success) {
-      setAuthError('')
-    } else {
-      setAuthError('Senha incorreta')
-    }
+    const ok = await login(password)
+    if (ok) setAuthError('')
+    else setAuthError('Senha incorreta. Tente novamente.')
   }
 
+  // ── Login screen
   if (!isAuthenticated) {
     return (
       <div className={styles.authContainer}>
         <div className={styles.authBox}>
-          <div className={styles.authLogo}>🔐</div>
-          <h2>Admin: {loja.nome}</h2>
-          <form onSubmit={handleLogin}>
+          <div className={styles.authIconWrap} aria-hidden="true">
+            <svg className={styles.authIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" />
+              <path d="M7 11V7a5 5 0 0110 0v4" />
+            </svg>
+          </div>
+          <h2 className={styles.authTitle}>Admin — {loja.nome}</h2>
+          <form className={styles.authForm} onSubmit={handleLogin}>
             <input
               type="password"
               className={styles.authInput}
               placeholder="Senha do administrador"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={e => setPassword(e.target.value)}
               autoFocus
+              autoComplete="current-password"
             />
             <button type="submit" className={styles.authBtn}>Entrar</button>
-            {authError && <p className={styles.authError}>{authError}</p>}
+            {authError && <p className={styles.authError} role="alert">{authError}</p>}
           </form>
-          <a href={linkCliente(loja.slug)} className={styles.backLink}>← Voltar ao catalogo</a>
+          <a href={linkCliente(loja.slug)} className={styles.backLink}>
+            {Icon.back} Ver catálogo
+          </a>
         </div>
       </div>
     )
   }
 
-  const handleConfigChange = (field, value) => {
-    setLocalConfig(prev => ({ ...prev, [field]: value }))
-  }
+  // ── Handlers
+  const handleConfigChange = (field, value) => setLocalConfig(prev => ({ ...prev, [field]: value }))
 
-  const handleProductChange = (id, field, value) => {
+  const handleProductChange = (id, field, value) =>
     setLocalProducts(prev => prev.map(p => p.id === id ? { ...p, [field]: value } : p))
-  }
 
   const handleSaveAll = async () => {
     if (saving || catalogLoading) return
-    setSaving(true)
-    setSaveMsg('')
-
+    setSaving(true); setSaveMsg('')
     try {
-      try {
-        await saveConfig(localConfig)
-      } catch (e) {
-        console.error('ERRO AO SALVAR CONFIG:', e)
-        setSaveMsg('Erro ao salvar configuração: ' + (e.message || JSON.stringify(e)))
-        setSaving(false)
-        return
-      }
-
+      await saveConfig(localConfig)
       const failures = []
       for (const p of localProducts) {
         if (!p.id) continue
         try {
-          const precoVal = parseFloat(String(p.preco ?? '').replace(',', '.'))
-          const precoOriginalVal = p.preco_original ? parseFloat(String(p.preco_original).replace(',', '.')) : null
-
+          const preco = parseFloat(String(p.preco ?? '').replace(',', '.'))
+          const precoOriginal = p.preco_original ? parseFloat(String(p.preco_original).replace(',', '.')) : null
           let quantidade = null
-          if (!(p.quantidade === '' || p.quantidade === null || p.quantidade === undefined || p.quantidade === 'undefined')) {
-            const parsed = parseInt(p.quantidade, 10)
-            if (!isNaN(parsed)) quantidade = parsed
+          if (!(p.quantidade === '' || p.quantidade === null || p.quantidade === undefined)) {
+            const n = parseInt(p.quantidade, 10)
+            if (!isNaN(n)) quantidade = n
           }
-
           await updateProduto(p.id, {
-            nome: p.nome || '',
-            descricao: p.descricao || '',
-            categoria: p.categoria || '',
-            preco: isNaN(precoVal) ? 0 : precoVal,
-            preco_original: isNaN(precoOriginalVal) ? null : precoOriginalVal,
-            em_promocao: !!p.em_promocao,
-            disponivel: !!p.disponivel,
-            quantidade
+            nome: p.nome || '', descricao: p.descricao || '', categoria: p.categoria || '',
+            preco: isNaN(preco) ? 0 : preco,
+            preco_original: isNaN(precoOriginal) ? null : precoOriginal,
+            em_promocao: !!p.em_promocao, disponivel: !!p.disponivel, quantidade
           })
-        } catch (e) {
-          console.error('FALHA AO SALVAR PRODUTO:', p.id, p.nome, e)
-          failures.push({ id: p.id, nome: p.nome, erro: e.message || String(e) })
-        }
+        } catch (e) { failures.push({ id: p.id, nome: p.nome, erro: e.message }) }
       }
-
       if (failures.length > 0) {
-        console.error('PRODUTOS COM FALHA:', failures)
-        const nomes = failures.map(f => `${f.nome} (id ${f.id})`).join(', ')
-        setSaveMsg('Erro ao salvar: ' + nomes + ' — ' + failures[0].erro)
+        setSaveMsgType('error')
+        setSaveMsg('Erro ao salvar: ' + failures.map(f => f.nome).join(', '))
       } else {
         newProductIdsRef.current.clear()
-        setSaveMsg('Catalogo salvo com sucesso!')
-        setTimeout(() => setSaveMsg(''), 3000)
+        setSaveMsgType('ok')
+        setSaveMsg('Catálogo salvo com sucesso!')
+        setTimeout(() => setSaveMsg(''), 3500)
       }
+    } catch (e) {
+      setSaveMsgType('error')
+      setSaveMsg('Erro: ' + (e.message || 'Falha ao salvar'))
     } finally {
       setSaving(false)
     }
@@ -236,57 +337,23 @@ export default function StoreAdminView({ loja }) {
 
   const handleSetPassword = async (e) => {
     e.preventDefault()
-    if (newPassword !== confirmPassword) {
-      setPasswordMsg('Senhas não coincidem')
-      return
-    }
-    if (newPassword.length < 4) {
-      setPasswordMsg('Senha muito curta (mínimo 4 caracteres)')
-      return
-    }
-
-    const { error } = await supabase.auth.updateUser({
-      password: newPassword
-    })
-
-    if (error) {
-      setPasswordMsg('Erro: ' + error.message)
-    } else {
-      setPasswordMsg('Senha alterada com sucesso!')
-      setNewPassword('')
-      setConfirmPassword('')
-      setSettingPassword(false)
-      setTimeout(() => setPasswordMsg(''), 3000)
-    }
+    if (newPassword !== confirmPassword) { setPasswordMsg('Senhas não coincidem'); return }
+    if (newPassword.length < 4) { setPasswordMsg('Senha muito curta (mínimo 4 caracteres)'); return }
+    const { error } = await supabase.auth.updateUser({ password: newPassword })
+    if (error) { setPasswordMsg('Erro: ' + error.message) }
+    else { setPasswordMsg('Senha alterada com sucesso!'); setSettingPassword(false); setTimeout(() => setPasswordMsg(''), 3000) }
   }
 
   const handleLogoUpload = async (e) => {
-    const file = e.target.files[0]
-    if (!file) return
-
+    const file = e.target.files[0]; if (!file) return
     try {
-      const fileExt = file.name.split('.').pop()
-      const fileName = `logo-${Date.now()}.${fileExt}`
-      const filePath = `loja-${loja.id}/${fileName}`
-
-      const { error: uploadError } = await crudSupabase.storage
-        .from('catalogo-imagens')
-        .upload(filePath, file)
-
-      if (uploadError) throw uploadError
-
-      const { data: { publicUrl } } = crudSupabase.storage
-        .from('catalogo-imagens')
-        .getPublicUrl(filePath)
-
+      const ext = file.name.split('.').pop()
+      const path = `loja-${loja.id}/logo-${Date.now()}.${ext}`
+      const { error: upErr } = await crudSupabase.storage.from('catalogo-imagens').upload(path, file)
+      if (upErr) throw upErr
+      const { data: { publicUrl } } = crudSupabase.storage.from('catalogo-imagens').getPublicUrl(path)
       handleConfigChange('logo_url', publicUrl)
-    } catch (err) {
-      alert('Erro no upload da logo: ' + err.message)
-    }
-  }
-
-  const handleRemoveLogo = () => {
-    handleConfigChange('logo_url', '')
+    } catch (err) { alert('Erro no upload da logo: ' + err.message) }
   }
 
   const handleAddProduct = async () => {
@@ -296,56 +363,36 @@ export default function StoreAdminView({ loja }) {
       const newP = await addProduto()
       newProductIdsRef.current.add(newP.id)
       setLocalProducts(prev => [...prev, newP])
-      setTimeout(() => {
-        document.getElementById(`product-${newP.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-      }, 150)
-    } catch (e) {
-      console.error('Erro ao adicionar produto:', e)
-      alert('Erro ao adicionar produto: ' + (e.message || JSON.stringify(e)))
-    } finally {
-      setAddingProduct(false)
-    }
+      setTimeout(() => document.getElementById(`product-${newP.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 150)
+    } catch (e) { alert('Erro ao adicionar produto: ' + (e.message || JSON.stringify(e))) }
+    finally { setAddingProduct(false) }
   }
 
-  const handleDragEnd = (event) => {
-    const { active, over } = event
+  const handleDragEnd = ({ active, over }) => {
     if (!over || active.id === over.id) return
-    const reordered = (() => {
-      setLocalProducts(prev => {
-        const oldIndex = prev.findIndex(p => p.id === active.id)
-        const newIndex = prev.findIndex(p => p.id === over.id)
-        if (oldIndex === -1 || newIndex === -1) return prev
-        const updated = [...prev]
-        const [moved] = updated.splice(oldIndex, 1)
-        updated.splice(newIndex, 0, moved)
-        reorderProdutos(updated.map(p => p.id)).catch(e => console.error('Erro ao salvar ordem:', e))
-        return updated
-      })
-    })()
+    setLocalProducts(prev => {
+      const oi = prev.findIndex(p => p.id === active.id)
+      const ni = prev.findIndex(p => p.id === over.id)
+      if (oi === -1 || ni === -1) return prev
+      const updated = [...prev]
+      const [moved] = updated.splice(oi, 1)
+      updated.splice(ni, 0, moved)
+      reorderProdutos(updated.map(p => p.id)).catch(console.error)
+      return updated
+    })
   }
 
-  const handleImageClick = (id) => {
-    pendingUploadId.current = id
-    fileInputRef.current?.click()
-  }
-
-  const handleDeleteProduct = (id) => {
-    setDeleteConfirm(id)
-  }
+  const handleImageClick = (id) => { pendingUploadId.current = id; fileInputRef.current?.click() }
 
   const handleFileChange = async (e) => {
-    const file = e.target.files[0]
-    const id = pendingUploadId.current
+    const file = e.target.files[0]; const id = pendingUploadId.current
     if (!file || !id) return
     setUploadingId(id)
     try {
       const url = await uploadImagem(id, file)
       setLocalProducts(prev => prev.map(p => p.id === id ? { ...p, imagem_url: url } : p))
-    } catch (err) {
-      alert('Erro no upload: ' + err.message)
-    } finally {
-      setUploadingId(null)
-    }
+    } catch (err) { alert('Erro no upload: ' + err.message) }
+    finally { setUploadingId(null) }
   }
 
   const executeDelete = async () => {
@@ -353,503 +400,468 @@ export default function StoreAdminView({ loja }) {
     try {
       await deleteProduto(deleteConfirm)
       setLocalProducts(prev => prev.filter(p => p.id !== deleteConfirm))
-    } catch (e) {
-      console.error('Erro ao remover produto:', e)
-      alert('Erro ao remover: ' + e.message)
-    } finally {
-      setDeleteConfirm(null)
-    }
+    } catch (e) { alert('Erro ao remover: ' + e.message) }
+    finally { setDeleteConfirm(null) }
   }
 
-  if (error) {
-    return (
-      <div className={styles.error}>
-        <h2>Erro ao carregar</h2>
-        <p>{error}</p>
-      </div>
-    )
-  }
-
-  const EMOJIS = { 'Aneis': '💍', 'Colares': '📿', 'Brincos': '✨', 'Pulseiras': '⭕', 'Outros': '🌟' }
+  if (error) return (
+    <div className={styles.error}><h2>Erro ao carregar</h2><p>{error}</p></div>
+  )
 
   return (
     <div className={styles.wrapper}>
-      <div className={styles.header}>
-        <div>
-          <div className={styles.headerLeft}>
-            <a href={linkCliente(loja.slug)} className={styles.backLink}>← Ver catalogo</a>
-          </div>
-          <div className={styles.headerTitle}>Painel da Loja</div>
-          <div className={styles.headerSub}>{loja.nome}</div>
+      {/* ── Topbar ── */}
+      <header className={styles.header}>
+        <div className={styles.headerLeft}>
+          <a href={linkCliente(loja.slug)} className={styles.backLink} aria-label="Ver catálogo">
+            {Icon.back} Ver catálogo
+          </a>
+          <span className={styles.headerTitle}>{loja.nome}</span>
         </div>
-        <button onClick={logout} className={styles.logoutBtn}>Sair</button>
-      </div>
+        <div className={styles.headerRight}>
+          <button onClick={logout} className={styles.logoutBtn} aria-label="Sair do painel">
+            {Icon.logout} Sair
+          </button>
+        </div>
+      </header>
 
       <div className={styles.body}>
-        <h2 className={styles.sectionTitle}>Personalizar loja <span>◆</span></h2>
-        <div className={styles.configGrid}>
-          <div className={styles.configCard}>
-            <label className={styles.label}>Nome da loja</label>
-            <input className={styles.input} value={localConfig.nome || ''} onChange={(e) => handleConfigChange('nome', e.target.value)} />
+
+        {/* ── Personalizar loja ── */}
+        <section className={styles.section} aria-labelledby="sec-loja">
+          <div className={styles.sectionHeader}>
+            <span className={styles.sectionIcon} aria-hidden="true">{Icon.store}</span>
+            <h2 className={styles.sectionTitle} id="sec-loja">Informações da loja</h2>
           </div>
-          <div className={styles.configCard}>
-            <label className={styles.label}>Slogan</label>
-            <input className={styles.input} value={localConfig.slogan || ''} onChange={(e) => handleConfigChange('slogan', e.target.value)} />
-          </div>
-          <div className={styles.configCard}>
-            <label className={styles.label}>WhatsApp (apenas DDD + número)</label>
-            <input className={styles.input} placeholder="85999999999" value={localConfig.whatsapp || ''} onChange={(e) => handleConfigChange('whatsapp', e.target.value)} />
-          </div>
-          <div className={styles.configCard}>
-            <label className={styles.label}>Instagram</label>
-            <input className={styles.input} placeholder="@sualoja" value={localConfig.instagram || ''} onChange={(e) => handleConfigChange('instagram', e.target.value)} />
-          </div>
-          <div className={styles.configCard}>
-            <label className={styles.label}>Mensagem Padrão WhatsApp</label>
-            <input
-              className={styles.input}
-              placeholder="Olá! Gostaria de saber mais sobre:"
-              value={localConfig.whatsapp_msg_prefix || ''}
-              onChange={(e) => handleConfigChange('whatsapp_msg_prefix', e.target.value)}
-            />
-            <small style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.8rem' }}>
-              Texto antes do nome do produto na mensagem do WhatsApp
-            </small>
-          </div>
-          <div className={styles.configCard}>
-            <label className={styles.label}>Exibir Quantidades</label>
-            <div className={styles.toggleRow}>
-              <label className={styles.toggle}>
-                <input 
-                  type="checkbox" 
-                  checked={!!localConfig.mostrar_quantidade} 
-                  onChange={(e) => handleConfigChange('mostrar_quantidade', e.target.checked)} 
-                />
-                <span className={styles.slider} />
-              </label>
-              <span className={styles.toggleLabel}>Mostrar quantidades disponíveis no catálogo</span>
+          <div className={styles.configGrid}>
+            <div className={styles.configCard}>
+              <label className={styles.label} htmlFor="cfg-nome">Nome da loja</label>
+              <input id="cfg-nome" className={styles.input} value={localConfig.nome || ''} onChange={e => handleConfigChange('nome', e.target.value)} />
             </div>
-            <small style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.8rem' }}>
-              Quando ativado, produtos aparecerão com estoque. Produtos zerados aparecerão como "ESGOTADO".
-            </small>
-          </div>
-          <div className={styles.configCard}>
-            <label className={styles.label}>Cor principal</label>
-            <div className={styles.colorRow}>
-              <input type="color" value={localConfig.cor_principal || '#C9A84C'} onChange={(e) => handleConfigChange('cor_principal', e.target.value)} className={styles.colorInput} />
-              <input type="text" className={styles.colorHexInput} value={localConfig.cor_principal || '#C9A84C'} onChange={(e) => { const raw = e.target.value; if (/^#[0-9a-fA-F]{0,6}$/.test(raw)) handleConfigChange('cor_principal', raw) }} maxLength={7} />
+            <div className={styles.configCard}>
+              <label className={styles.label} htmlFor="cfg-slogan">Slogan</label>
+              <input id="cfg-slogan" className={styles.input} value={localConfig.slogan || ''} onChange={e => handleConfigChange('slogan', e.target.value)} />
             </div>
-          </div>
-          <div className={styles.configCard}>
-            <label className={styles.label}>Cor de destaque</label>
-            <div className={styles.colorRow}>
-              <input type="color" value={localConfig.cor_destaque || '#C47B82'} onChange={(e) => handleConfigChange('cor_destaque', e.target.value)} className={styles.colorInput} />
-              <input type="text" className={styles.colorHexInput} value={localConfig.cor_destaque || '#C47B82'} onChange={(e) => { const raw = e.target.value; if (/^#[0-9a-fA-F]{0,6}$/.test(raw)) handleConfigChange('cor_destaque', raw) }} maxLength={7} />
+            <div className={styles.configCard}>
+              <label className={styles.label} htmlFor="cfg-whatsapp">WhatsApp (DDD + número)</label>
+              <input id="cfg-whatsapp" className={styles.input} placeholder="85999999999" value={localConfig.whatsapp || ''} onChange={e => handleConfigChange('whatsapp', e.target.value)} inputMode="tel" />
             </div>
-          </div>
-          <div className={styles.configCard}>
-            <label className={styles.label}>Cor do Topo</label>
-            <div className={styles.colorRow}>
-              <input type="color" value={localConfig.cor_topo || '#1a1a2e'} onChange={(e) => handleConfigChange('cor_topo', e.target.value)} className={styles.colorInput} />
-              <input type="text" className={styles.colorHexInput} value={localConfig.cor_topo || '#1a1a2e'} onChange={(e) => { const raw = e.target.value; if (/^#[0-9a-fA-F]{0,6}$/.test(raw)) handleConfigChange('cor_topo', raw) }} maxLength={7} />
+            <div className={styles.configCard}>
+              <label className={styles.label} htmlFor="cfg-instagram">Instagram</label>
+              <input id="cfg-instagram" className={styles.input} placeholder="@sualoja" value={localConfig.instagram || ''} onChange={e => handleConfigChange('instagram', e.target.value)} />
             </div>
-          </div>
-          <div className={styles.configCard}>
-            <label className={styles.label}>Cor do Rodapé</label>
-            <div className={styles.colorRow}>
-              <input type="color" value={localConfig.cor_rodape || '#1a1a2e'} onChange={(e) => handleConfigChange('cor_rodape', e.target.value)} className={styles.colorInput} />
-              <input type="text" className={styles.colorHexInput} value={localConfig.cor_rodape || '#1a1a2e'} onChange={(e) => { const raw = e.target.value; if (/^#[0-9a-fA-F]{0,6}$/.test(raw)) handleConfigChange('cor_rodape', raw) }} maxLength={7} />
+            <div className={styles.configCard}>
+              <label className={styles.label} htmlFor="cfg-wamsg">Mensagem padrão WhatsApp</label>
+              <input id="cfg-wamsg" className={styles.input} placeholder="Olá! Gostaria de saber mais sobre:" value={localConfig.whatsapp_msg_prefix || ''} onChange={e => handleConfigChange('whatsapp_msg_prefix', e.target.value)} />
+              <span className={styles.helper}>Texto antes do nome do produto na mensagem</span>
             </div>
-          </div>
-          <div className={styles.configCard}>
-            <label className={styles.label}>Cor de Fundo</label>
-            <div className={styles.colorRow}>
-              <input type="color" value={localConfig.cor_fundo || '#fafafa'} onChange={(e) => handleConfigChange('cor_fundo', e.target.value)} className={styles.colorInput} />
-              <input type="text" className={styles.colorHexInput} value={localConfig.cor_fundo || '#fafafa'} onChange={(e) => { const raw = e.target.value; if (/^#[0-9a-fA-F]{0,6}$/.test(raw)) handleConfigChange('cor_fundo', raw) }} maxLength={7} />
-            </div>
-          </div>
-          <div className={styles.configCard}>
-            <label className={styles.label}>Fonte do Texto</label>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '200px', overflowY: 'auto' }}>
-              {[
-                { value: 'Arial, sans-serif', label: 'Arial' },
-                { value: 'Helvetica, sans-serif', label: 'Helvetica' },
-                { value: 'Georgia, serif', label: 'Georgia' },
-                { value: "'Times New Roman', serif", label: 'Times New Roman' },
-                { value: "'Courier New', monospace", label: 'Courier New' },
-                { value: 'Verdana, sans-serif', label: 'Verdana' },
-                { value: "'Trebuchet MS', sans-serif", label: 'Trebuchet MS' },
-                { value: 'Impact, sans-serif', label: 'Impact' },
-                { value: "'Comic Sans MS', cursive", label: 'Comic Sans MS' },
-                { value: 'Palatino, serif', label: 'Palatino' },
-                { value: 'Garamond, serif', label: 'Garamond' },
-                { value: "'Open Sans', sans-serif", label: 'Open Sans' },
-                { value: "'Roboto', sans-serif", label: 'Roboto' },
-                { value: "'Lato', sans-serif", label: 'Lato' },
-                { value: "'Montserrat', sans-serif", label: 'Montserrat' },
-                { value: "'Poppins', sans-serif", label: 'Poppins' },
-              ].map(font => (
-                <label
-                  key={font.value}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    padding: '0.5rem',
-                    border: `1px solid ${localConfig.fonte_texto === font.value ? '#C9A84C' : '#444'}`,
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    fontFamily: font.value,
-                    color: '#fff',
-                    background: localConfig.fonte_texto === font.value ? 'rgba(201, 168, 76, 0.1)' : 'transparent',
-                    transition: 'all 0.2s'
-                  }}
-                >
-                  <input
-                    type="radio"
-                    value={font.value}
-                    checked={localConfig.fonte_texto === font.value}
-                    onChange={(e) => handleConfigChange('fonte_texto', e.target.value)}
-                    style={{ accentColor: '#C9A84C' }}
-                  />
-                  <span>{font.label}</span>
+            <div className={styles.configCard}>
+              <label className={styles.label}>Mostrar quantidade em estoque</label>
+              <div className={styles.toggleRow}>
+                <label className={styles.toggle}>
+                  <input type="checkbox" checked={!!localConfig.mostrar_quantidade} onChange={e => handleConfigChange('mostrar_quantidade', e.target.checked)} />
+                  <span className={styles.slider} />
                 </label>
-              ))}
+                <span className={styles.toggleLabel}>Exibir estoque no catálogo</span>
+              </div>
+              <span className={styles.helper}>Produtos com estoque zero aparecem como "Esgotado"</span>
             </div>
-          </div>
-          <div className={styles.configCard}>
-            <label className={styles.label}>Logo da Loja</label>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-              {localConfig.logo_url && (
-                <>
-                  <img src={localConfig.logo_url} alt="Logo" style={{ height: '60px', objectFit: 'contain' }} />
-                  <button type="button" className={styles.removeLogoBtn} onClick={handleRemoveLogo}>
-                    ✕ Remover
+            {/* Logo */}
+            <div className={styles.configCard} style={{ gridColumn: '1 / -1' }}>
+              <label className={styles.label}>Logo da loja</label>
+              <div className={styles.logoSection}>
+                {localConfig.logo_url && (
+                  <img src={localConfig.logo_url} alt="Logo da loja" className={styles.logoPreview} />
+                )}
+                <label className={styles.uploadLabel}>
+                  <span className={styles.uploadIcon} aria-hidden="true">{Icon.upload}</span>
+                  {localConfig.logo_url ? 'Trocar logo' : 'Enviar logo'}
+                  <input type="file" accept="image/*" onChange={handleLogoUpload} style={{ display: 'none' }} />
+                </label>
+                {localConfig.logo_url && (
+                  <button type="button" className={styles.removeLogoBtn} onClick={() => handleConfigChange('logo_url', '')}>
+                    Remover
                   </button>
-                </>
-              )}
-              <label style={{
-                background: 'rgba(255,255,255,0.1)',
-                color: '#fff',
-                padding: '0.5rem 1rem',
-                borderRadius: '6px',
-                cursor: 'pointer',
-                fontSize: '0.9rem',
-                transition: 'all 0.2s',
-                border: '1px solid rgba(255,255,255,0.2)'
-              }}
-              onMouseOver={(e) => e.target.style.background = 'rgba(255,255,255,0.2)'}
-              onMouseOut={(e) => e.target.style.background = 'rgba(255,255,255,0.1)'}
-              >
-                📁 Escolher arquivo
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleLogoUpload}
-                  style={{ display: 'none' }}
-                />
-              </label>
-            </div>
-          </div>
-        </div>
-
-        <h2 className={styles.sectionTitle}>Definir Senha de Acesso <span>◆</span></h2>
-        <div className={styles.promoBox}>
-          <button
-            className={styles.addBtn}
-            onClick={() => setSettingPassword(!settingPassword)}
-          >
-            {settingPassword ? 'Cancelar' : 'Alterar Senha'}
-          </button>
-          {settingPassword && (
-            <form onSubmit={handleSetPassword} className={styles.passwordForm}>
-              <input
-                type="password"
-                className={styles.input}
-                placeholder="Nova senha"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-              />
-              <input
-                type="password"
-                className={styles.input}
-                placeholder="Confirmar senha"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-              />
-              <button type="submit" className={styles.saveBtn}>Salvar Senha</button>
-              {passwordMsg && <p className={styles.saveMsg}>{passwordMsg}</p>}
-            </form>
-          )}
-        </div>
-
-        <h2 className={styles.sectionTitle}>Categorias <span>◆</span></h2>
-        <div className={styles.promoBox}>
-          <button
-            className={styles.addBtn}
-            onClick={() => setGerenciandoCategorias(!gerenciandoCategorias)}
-          >
-            {gerenciandoCategorias ? 'Fechar' : 'Gerenciar Categorias'}
-          </button>
-
-          {gerenciandoCategorias && (
-            <div style={{ marginTop: '1rem' }}>
-              {categorias.map((cat, idx) => (
-                <div key={idx} className={styles.catRow}>
-                  <span>{cat}</span>
-                  <button
-                    className={styles.delBtn}
-                    onClick={() => {
-                      const novas = categorias.filter((_, i) => i !== idx)
-                      setCategorias(novas)
-                      updateCategorias(novas)
-                    }}
-                  >×</button>
-                </div>
-              ))}
-
-              <div className={styles.catAddRow}>
-                <input
-                  className={styles.input}
-                  placeholder="Nova categoria"
-                  value={novaCategoria}
-                  onChange={(e) => setNovaCategoria(e.target.value)}
-                />
-                <button
-                  className={styles.saveBtn}
-                  onClick={async () => {
-                    if (novaCategoria.trim() && !categorias.includes(novaCategoria.trim())) {
-                      const novas = [...categorias, novaCategoria.trim()]
-                      setCategorias(novas)
-                      try {
-                        await updateCategorias(novas)
-                        setNovaCategoria('')
-                      } catch (e) {
-                        alert('Erro ao salvar categoria: ' + e.message)
-                        setCategorias(categorias)
-                      }
-                    }
-                  }}
-                >
-                  Adicionar
-                </button>
+                )}
               </div>
             </div>
-          )}
-        </div>
-
-        <h2 className={styles.sectionTitle}>Promocao <span>◆</span></h2>
-        <div className={styles.promoBox}>
-          <div className={styles.toggleRow}>
-            <label className={styles.toggle}>
-              <input type="checkbox" checked={!!localConfig.promo_ativa} onChange={(e) => handleConfigChange('promo_ativa', e.target.checked)} />
-              <span className={styles.slider} />
-            </label>
-            <span className={styles.toggleLabel}>Ativar banner de promocao no topo do catalogo</span>
           </div>
-          <input
-            className={styles.input}
-            placeholder="Ex: 20% OFF em brincos este fim de semana!"
-            value={localConfig.promo_texto || ''}
-            onChange={(e) => handleConfigChange('promo_texto', e.target.value)}
-          />
-          <div className={styles.configCard}>
-            <label className={styles.label}>Cor do Banner</label>
-            <div className={styles.colorRow}>
-              <input
-                type="color"
-                value={localConfig.promo_cor || '#4caf50'}
-                onChange={(e) => handleConfigChange('promo_cor', e.target.value)}
-                className={styles.colorInput}
-              />
-              <input type="text" className={styles.colorHexInput} value={localConfig.promo_cor || '#4caf50'} onChange={(e) => { const raw = e.target.value; if (/^#[0-9a-fA-F]{0,6}$/.test(raw)) handleConfigChange('promo_cor', raw) }} maxLength={7} />
+        </section>
+
+        {/* ── Cores ── */}
+        <section className={styles.section} aria-labelledby="sec-cores">
+          <div className={styles.sectionHeader}>
+            <span className={styles.sectionIcon} aria-hidden="true">{Icon.palette}</span>
+            <h2 className={styles.sectionTitle} id="sec-cores">Cores & Tipografia</h2>
+          </div>
+          <div className={styles.configGrid}>
+            <ColorField label="Cor principal" configKey="cor_principal" value={localConfig.cor_principal || '#C9A84C'} onChange={handleConfigChange} />
+            <ColorField label="Cor de destaque" configKey="cor_destaque" value={localConfig.cor_destaque || '#C47B82'} onChange={handleConfigChange} />
+            <ColorField label="Cor do topo" configKey="cor_topo" value={localConfig.cor_topo || '#1a1a2e'} onChange={handleConfigChange} />
+            <ColorField label="Cor do rodapé" configKey="cor_rodape" value={localConfig.cor_rodape || '#1a1a2e'} onChange={handleConfigChange} />
+            <ColorField label="Cor de fundo" configKey="cor_fundo" value={localConfig.cor_fundo || '#fafafa'} onChange={handleConfigChange} />
+            <div className={styles.configCard}>
+              <label className={styles.label}>Fonte do texto</label>
+              <div className={styles.fontList}>
+                {FONTS.map(font => {
+                  const active = localConfig.fonte_texto === font.value
+                  return (
+                    <label key={font.value} className={`${styles.fontOption} ${active ? styles.fontOptionActive : ''}`} style={{ fontFamily: font.value }}>
+                      <input type="radio" value={font.value} checked={active} onChange={e => handleConfigChange('fonte_texto', e.target.value)} />
+                      {active && <span className={styles.fontCheckIcon}>{Icon.check}</span>}
+                      {font.label}
+                    </label>
+                  )
+                })}
+              </div>
             </div>
           </div>
-        </div>
+        </section>
 
-        <h2 className={styles.sectionTitle}>Produtos <span>◆</span></h2>
-        
-        <div className={styles.promoBox} style={{ marginBottom: '1rem' }}>
-          <div className={styles.configCard}>
-            <label className={styles.label}>Cor do selo % OFF</label>
-            <div className={styles.colorRow}>
-              <input
-                type="color"
-                value={localConfig.promo_badge_cor || '#FA098A'}
-                onChange={(e) => handleConfigChange('promo_badge_cor', e.target.value)}
-                className={styles.colorInput}
-              />
-              <input type="text" className={styles.colorHexInput} value={localConfig.promo_badge_cor || '#FA098A'} onChange={(e) => { const raw = e.target.value; if (/^#[0-9a-fA-F]{0,6}$/.test(raw)) handleConfigChange('promo_badge_cor', raw) }} maxLength={7} />
-            </div>
-            <small style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.8rem' }}>
-              Esta cor será aplicada no selo de desconto dos produtos em promoção.
-            </small>
+        {/* ── Promoção ── */}
+        <section className={styles.section} aria-labelledby="sec-promo">
+          <div className={styles.sectionHeader}>
+            <span className={styles.sectionIcon} aria-hidden="true">{Icon.promo}</span>
+            <h2 className={styles.sectionTitle} id="sec-promo">Banner de Promoção</h2>
           </div>
-        </div>
+          <div className={styles.card}>
+            <div className={styles.promoBox}>
+              <div className={styles.toggleRow}>
+                <label className={styles.toggle}>
+                  <input type="checkbox" checked={!!localConfig.promo_ativa} onChange={e => handleConfigChange('promo_ativa', e.target.checked)} />
+                  <span className={styles.slider} />
+                </label>
+                <span className={styles.toggleLabel}>Ativar banner de promoção no topo do catálogo</span>
+              </div>
+              <div>
+                <label className={styles.label} htmlFor="cfg-promo-texto" style={{ marginBottom: '0.4rem' }}>Texto do banner</label>
+                <input
+                  id="cfg-promo-texto"
+                  className={styles.input}
+                  placeholder="Ex: 20% OFF em brincos este fim de semana!"
+                  value={localConfig.promo_texto || ''}
+                  onChange={e => handleConfigChange('promo_texto', e.target.value)}
+                />
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.75rem' }}>
+                <ColorField label="Cor do banner" configKey="promo_cor" value={localConfig.promo_cor || '#4caf50'} onChange={handleConfigChange} />
+                <ColorField label="Cor do selo % OFF" configKey="promo_badge_cor" value={localConfig.promo_badge_cor || '#FA098A'} onChange={handleConfigChange} />
+              </div>
+            </div>
+          </div>
+        </section>
 
-        <button className={styles.addBtn} onClick={handleAddProduct} disabled={addingProduct || catalogLoading}>
-          {catalogLoading ? 'Carregando...' : addingProduct ? 'Adicionando...' : '+ Adicionar produto'}
-        </button>
-
-        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-          <SortableContext items={localProducts.map(p => p.id)} strategy={verticalListSortingStrategy}>
-            <div className={styles.productList}>
-              {localProducts.length === 0 && (
-                <div className={styles.emptyState}>
-                  Nenhum produto ainda.<br />
-                  <small>Clique em "+ Adicionar produto" para comecar.</small>
+        {/* ── Categorias ── */}
+        <section className={styles.section} aria-labelledby="sec-cats">
+          <div className={styles.sectionHeader}>
+            <span className={styles.sectionIcon} aria-hidden="true">{Icon.tag}</span>
+            <h2 className={styles.sectionTitle} id="sec-cats">Categorias</h2>
+          </div>
+          <div className={styles.card}>
+            <button className={styles.inlineBtn} onClick={() => setGerenciandoCategorias(v => !v)}>
+              {gerenciandoCategorias ? 'Fechar' : 'Gerenciar categorias'}
+            </button>
+            {gerenciandoCategorias && (
+              <div>
+                <div className={styles.catList}>
+                  {categorias.map((cat, idx) => (
+                    <div key={idx} className={styles.catRow}>
+                      <span>{cat}</span>
+                      <button
+                        className={styles.delBtn}
+                        aria-label={`Remover categoria ${cat}`}
+                        onClick={() => {
+                          const novas = categorias.filter((_, i) => i !== idx)
+                          setCategorias(novas); updateCategorias(novas)
+                        }}
+                      >×</button>
+                    </div>
+                  ))}
                 </div>
-              )}
-              {localProducts.map(p => (
-                <SortableProductRow key={p.id} id={p.id}>
-                  {(listeners) => (
-                    <div id={`product-${p.id}`} className={`${styles.productRow} ${newProductIdsRef.current.has(p.id) ? styles.productRowNew : ''}`}>
-                      {newProductIdsRef.current.has(p.id) && <span className={styles.newBadge}>NOVO</span>}
-                      <span {...listeners} className={styles.dragHandle} title="Arrastar para reordenar">⠿</span>
-                      <button className={styles.delBtnTop} onClick={() => handleDeleteProduct(p.id)} title="Remover produto">×</button>
-                      <div className={styles.thumb} onClick={() => handleImageClick(p.id)} title="Clique para trocar a foto">
-                        {uploadingId === p.id
-                          ? <span className={styles.uploading}>⏳</span>
-                          : p.imagem_url
-                            ? <img src={p.imagem_url} alt={p.nome} />
-                            : <span>{EMOJIS[p.categoria] || '✨'}</span>
-                        }
-                        <div className={styles.thumbOverlay}>trocar foto</div>
-                      </div>
+                <div className={styles.catAddRow}>
+                  <input
+                    className={styles.input}
+                    placeholder="Nova categoria..."
+                    value={novaCategoria}
+                    onChange={e => setNovaCategoria(e.target.value)}
+                    onKeyDown={async e => {
+                      if (e.key !== 'Enter') return
+                      e.preventDefault()
+                      if (novaCategoria.trim() && !categorias.includes(novaCategoria.trim())) {
+                        const novas = [...categorias, novaCategoria.trim()]
+                        setCategorias(novas)
+                        try { await updateCategorias(novas); setNovaCategoria('') }
+                        catch (ex) { alert('Erro: ' + ex.message); setCategorias(categorias) }
+                      }
+                    }}
+                  />
+                  <button
+                    className={styles.saveSmallBtn}
+                    onClick={async () => {
+                      if (novaCategoria.trim() && !categorias.includes(novaCategoria.trim())) {
+                        const novas = [...categorias, novaCategoria.trim()]
+                        setCategorias(novas)
+                        try { await updateCategorias(novas); setNovaCategoria('') }
+                        catch (ex) { alert('Erro: ' + ex.message); setCategorias(categorias) }
+                      }
+                    }}
+                  >
+                    Adicionar
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </section>
 
-                      <div className={styles.fields}>
-                        <div className={styles.rowTop}>
-                          <input className={styles.field} placeholder="Nome do produto" value={p.nome} onChange={(e) => handleProductChange(p.id, 'nome', e.target.value)} />
-                           <select
-                            className={styles.select}
-                            value={p.categoria || ''}
-                            onChange={(e) => {
-                              handleProductChange(p.id, 'categoria', e.target.value)
-                            }}
-                          >
-                            <option value="">Selecione...</option>
-                            {Array.isArray(categorias) ? categorias.map((c, i) => (
-                              <option key={i} value={c}>{c}</option>
-                            )) : null}
-                          </select>
+        {/* ── Senha ── */}
+        <section className={styles.section} aria-labelledby="sec-senha">
+          <div className={styles.sectionHeader}>
+            <span className={styles.sectionIcon} aria-hidden="true">{Icon.lock}</span>
+            <h2 className={styles.sectionTitle} id="sec-senha">Senha de Acesso</h2>
+          </div>
+          <div className={styles.card}>
+            <button className={styles.inlineBtn} onClick={() => setSettingPassword(v => !v)}>
+              {settingPassword ? 'Cancelar' : 'Alterar senha'}
+            </button>
+            {settingPassword && (
+              <form onSubmit={handleSetPassword} className={styles.passwordForm}>
+                <input type="password" className={styles.input} placeholder="Nova senha (mín. 4 caracteres)" value={newPassword} onChange={e => setNewPassword(e.target.value)} autoComplete="new-password" />
+                <input type="password" className={styles.input} placeholder="Confirmar nova senha" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} autoComplete="new-password" />
+                <button type="submit" className={styles.saveSmallBtn}>Salvar senha</button>
+                {passwordMsg && <p style={{ color: passwordMsg.includes('sucesso') ? '#4ade80' : '#f87171', fontSize: '0.85rem' }}>{passwordMsg}</p>}
+              </form>
+            )}
+          </div>
+        </section>
+
+        {/* ── Produtos ── */}
+        <section className={styles.section} aria-labelledby="sec-produtos">
+          <div className={styles.sectionHeader}>
+            <span className={styles.sectionIcon} aria-hidden="true">{Icon.box}</span>
+            <h2 className={styles.sectionTitle} id="sec-produtos">Produtos</h2>
+          </div>
+
+          <button className={styles.addProductBtn} onClick={handleAddProduct} disabled={addingProduct || catalogLoading} aria-label="Adicionar novo produto">
+            <span aria-hidden="true">{Icon.plus}</span>
+            {catalogLoading ? 'Carregando...' : addingProduct ? 'Adicionando...' : 'Adicionar produto'}
+          </button>
+
+          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+            <SortableContext items={localProducts.map(p => p.id)} strategy={verticalListSortingStrategy}>
+              <div className={styles.productList}>
+                {localProducts.length === 0 && (
+                  <div className={styles.emptyState}>
+                    Nenhum produto ainda.
+                    <small>Clique em "Adicionar produto" para começar.</small>
+                  </div>
+                )}
+                {localProducts.map(p => (
+                  <SortableProductRow key={p.id} id={p.id}>
+                    {(listeners) => (
+                      <div id={`product-${p.id}`} className={`${styles.productRow} ${newProductIdsRef.current.has(p.id) ? styles.productRowNew : ''}`}>
+                        {newProductIdsRef.current.has(p.id) && <span className={styles.newBadge}>NOVO</span>}
+
+                        {/* Col 1: drag */}
+                        <DragHandle listeners={listeners} />
+
+                        {/* Col 2: thumbnail */}
+                        <div className={styles.thumb} onClick={() => handleImageClick(p.id)} role="button" tabIndex={0} aria-label="Trocar foto do produto" onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') handleImageClick(p.id) }}>
+                          {uploadingId === p.id ? (
+                            <div className={styles.uploadingOverlay}>
+                              <div className={styles.uploadSpinner} aria-label="Enviando..." />
+                            </div>
+                          ) : p.imagem_url ? (
+                            <img src={p.imagem_url} alt={p.nome || 'Produto'} />
+                          ) : (
+                            <div className={styles.thumbPlaceholder} aria-hidden="true">
+                              <span className={styles.thumbPlaceholderIcon}>{Icon.image}</span>
+                              <span className={styles.thumbPlaceholderText}>foto</span>
+                            </div>
+                          )}
+                          <div className={styles.thumbOverlay} aria-hidden="true">
+                            <span className={styles.thumbOverlayIcon}>{Icon.camera}</span>
+                            <span className={styles.thumbOverlayText}>trocar</span>
+                          </div>
                         </div>
+
+                        {/* Col 3: fields */}
+                        <div className={styles.fields}>
+                          <div className={styles.rowTop}>
+                            <input
+                              className={styles.field}
+                              placeholder="Nome do produto"
+                              value={p.nome || ''}
+                              onChange={e => handleProductChange(p.id, 'nome', e.target.value)}
+                              aria-label="Nome do produto"
+                            />
+                            <select
+                              className={styles.selectField}
+                              value={p.categoria || ''}
+                              onChange={e => handleProductChange(p.id, 'categoria', e.target.value)}
+                              aria-label="Categoria"
+                            >
+                              <option value="">Categoria...</option>
+                              {categorias.map((c, i) => <option key={i} value={c}>{c}</option>)}
+                            </select>
+                          </div>
+
+                          <textarea
+                            className={`${styles.field} ${styles.descField}`}
+                            placeholder="Descrição curta..."
+                            value={p.descricao || ''}
+                            onChange={e => handleProductChange(p.id, 'descricao', e.target.value)}
+                            rows={2}
+                            aria-label="Descrição"
+                          />
+
                           <div className={styles.rowMid}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                              <span style={{ color: '#fff', fontSize: '0.9rem' }}>R$</span>
+                            <div className={styles.priceGroup}>
+                              <span className={styles.pricePrefix}>R$</span>
                               <input
-                                className={styles.field}
-                                placeholder="89,90"
+                                className={styles.priceField}
+                                placeholder="0,00"
                                 value={p.preco ? (typeof p.preco === 'number' ? p.preco.toFixed(2).replace('.', ',') : p.preco.toString()) : ''}
-                                onChange={(e) => {
-                                  const val = e.target.value.replace(/[^\d,]/g, '')
-                                  handleProductChange(p.id, 'preco', val)
-                                }}
+                                onChange={e => handleProductChange(p.id, 'preco', e.target.value.replace(/[^\d,]/g, ''))}
+                                aria-label="Preço"
+                                inputMode="decimal"
                               />
                             </div>
                             {p.em_promocao && (
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                <span style={{ color: '#fff', fontSize: '0.9rem' }}>R$</span>
+                              <div className={styles.priceGroup}>
+                                <span className={styles.pricePrefix}>De R$</span>
                                 <input
-                                  className={`${styles.field} ${styles.promoField}`}
-                                  placeholder="Preço original"
+                                  className={styles.priceField}
+                                  placeholder="0,00"
                                   value={p.preco_original ? (typeof p.preco_original === 'number' ? p.preco_original.toFixed(2).replace('.', ',') : p.preco_original.toString()) : ''}
-                                  onChange={(e) => {
-                                    const val = e.target.value.replace(/[^\d,]/g, '')
-                                    handleProductChange(p.id, 'preco_original', val)
-                                  }}
+                                  onChange={e => handleProductChange(p.id, 'preco_original', e.target.value.replace(/[^\d,]/g, ''))}
+                                  aria-label="Preço original"
+                                  inputMode="decimal"
                                 />
-                                {p.preco_original && p.preco && (
-                                  <span style={{ color: '#4caf50', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>
-                                    {Math.round(((parseFloat(p.preco_original.toString().replace(',', '.')) - parseFloat(p.preco.toString().replace(',', '.'))) / parseFloat(p.preco_original.toString().replace(',', '.'))) * 100)}% OFF
-                                  </span>
-                                )}
+                                {p.preco_original && p.preco && (() => {
+                                  const po = parseFloat(String(p.preco_original).replace(',', '.'))
+                                  const pr = parseFloat(String(p.preco).replace(',', '.'))
+                                  const pct = Math.round(((po - pr) / po) * 100)
+                                  return pct > 0 ? <span className={styles.discountBadge}>-{pct}%</span> : null
+                                })()}
                               </div>
                             )}
-                            <label className={styles.checkRow}>
-                              <input type="checkbox" checked={!!p.em_promocao} onChange={(e) => handleProductChange(p.id, 'em_promocao', e.target.checked)} className={styles.check} />
-                              <span className={styles.checkLabel}>Promo</span>
-                          </label>
-                        </div>
-                        <input className={`${styles.field} ${styles.descField}`} placeholder="Descricao curta..." value={p.descricao || ''} onChange={(e) => handleProductChange(p.id, 'descricao', e.target.value)} />
-                        <label className={styles.checkRow}>
-                          <input type="checkbox" checked={!!p.disponivel} onChange={(e) => handleProductChange(p.id, 'disponivel', e.target.checked)} className={styles.check} />
-                          <span className={styles.checkLabel}>Visivel no catalogo</span>
-                        </label>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.5rem' }}>
-                          <span style={{ color: '#fff', fontSize: '0.9rem' }}>Qtd:</span>
-                          <input
-                            type="number"
-                            min="0"
-                            className={styles.field}
-                            style={{ maxWidth: '80px' }}
-                            placeholder="∞"
-                            value={p.quantidade ?? ''}
-                            onChange={(e) => {
-                              const val = e.target.value === '' ? null : parseInt(e.target.value)
-                              handleProductChange(p.id, 'quantidade', val)
-                            }}
-                          />
-                          {p.quantidade === 0 && (
-                            <span style={{ color: '#f44336', fontSize: '0.85rem', fontWeight: 'bold' }}>
-                              ESGOTADO
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </SortableProductRow>
-              ))}
-            </div>
-          </SortableContext>
-        </DndContext>
+                          </div>
 
-        <button className={styles.saveBtnFloat} onClick={handleSaveAll} disabled={saving || catalogLoading}>
-          {catalogLoading ? 'Carregando...' : saving ? 'Salvando...' : 'Salvar tudo'}
-        </button>
-        {saveMsg && <p className={styles.saveMsg}>{saveMsg}</p>}
+                          <div className={styles.rowBottom}>
+                            <label className={styles.checkRow}>
+                              <input type="checkbox" className={styles.check} checked={!!p.em_promocao} onChange={e => handleProductChange(p.id, 'em_promocao', e.target.checked)} />
+                              <span className={styles.checkLabel}>Em promoção</span>
+                            </label>
+                            <label className={styles.checkRow}>
+                              <input type="checkbox" className={styles.check} checked={!!p.disponivel} onChange={e => handleProductChange(p.id, 'disponivel', e.target.checked)} />
+                              <span className={styles.checkLabel}>Visível no catálogo</span>
+                            </label>
+                            <div className={styles.qtyGroup}>
+                              <span className={styles.qtyLabel}>Estoque</span>
+                              <input
+                                type="number"
+                                min="0"
+                                className={styles.qtyField}
+                                placeholder="∞"
+                                value={p.quantidade ?? ''}
+                                onChange={e => handleProductChange(p.id, 'quantidade', e.target.value === '' ? null : parseInt(e.target.value))}
+                                aria-label="Quantidade em estoque"
+                                inputMode="numeric"
+                              />
+                              {p.quantidade === 0 && <span className={styles.esgotadoTag}>ESGOTADO</span>}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Col 4: delete */}
+                        <button
+                          className={styles.delBtnTop}
+                          onClick={() => setDeleteConfirm(p.id)}
+                          aria-label={`Excluir ${p.nome || 'produto'}`}
+                          title="Excluir produto"
+                        >
+                          {Icon.trash}
+                        </button>
+                      </div>
+                    )}
+                  </SortableProductRow>
+                ))}
+              </div>
+            </SortableContext>
+          </DndContext>
+        </section>
       </div>
 
+      {/* ── Hidden file input ── */}
       <input ref={fileInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleFileChange} />
 
+      {/* ── Floating save ── */}
+      <button
+        className={styles.saveBtnFloat}
+        onClick={handleSaveAll}
+        disabled={saving || catalogLoading}
+        aria-label="Salvar todas as alterações"
+      >
+        <span className={styles.saveBtnIcon} aria-hidden="true">{Icon.save}</span>
+        {catalogLoading ? 'Carregando...' : saving ? 'Salvando...' : 'Salvar tudo'}
+      </button>
+
+      {saveMsg && (
+        <div
+          className={`${styles.saveMsg} ${saveMsgType === 'error' ? styles.saveMsgError : ''}`}
+          role="status"
+          aria-live="polite"
+        >
+          {saveMsg}
+        </div>
+      )}
+
+      {/* ── Delete confirm ── */}
       {deleteConfirm && (
-        <div className={styles.confirmOverlay}>
+        <div className={styles.confirmOverlay} role="dialog" aria-modal="true" aria-label="Confirmar exclusão">
           <div className={styles.confirmModal}>
-            <h3>Confirmar Exclusão</h3>
-            <p>Tem certeza que deseja remover este produto?</p>
+            <h3>Excluir produto</h3>
+            <p>Esta ação não pode ser desfeita. Deseja continuar?</p>
             <div className={styles.confirmActions}>
-              <button className={styles.cancelBtn} onClick={() => setDeleteConfirm(null)}>
-                Cancelar
-              </button>
-              <button className={styles.deleteConfirmBtn} onClick={executeDelete}>
-                Excluir
-              </button>
+              <button className={styles.cancelBtn} onClick={() => setDeleteConfirm(null)}>Cancelar</button>
+              <button className={styles.deleteConfirmBtn} onClick={executeDelete}>Excluir</button>
             </div>
           </div>
         </div>
       )}
 
+      {/* ── Onboarding ── */}
       {showOnboarding && (
-        <div className={styles.confirmOverlay} onClick={() => setShowOnboarding(false)}>
+        <div className={styles.confirmOverlay} onClick={() => setShowOnboarding(false)} role="dialog" aria-modal="true" aria-label="Bem-vindo ao painel">
           <div className={styles.onboardingModal} onClick={e => e.stopPropagation()}>
-            <div className={styles.onboardingIcon}>👋</div>
-            <h3>Bem-vindo ao Painel!</h3>
+            <div className={styles.onboardingTop}>
+              <div className={styles.onboardingIconWrap} aria-hidden="true">
+                <span className={styles.onboardingIconSvg}>{Icon.wave}</span>
+              </div>
+              <h3 className={styles.onboardingTitle}>Bem-vindo ao painel!</h3>
+            </div>
             <ul className={styles.onboardingList}>
-              <li>🎨 Personalize cores, logo e informações da loja na seção <strong>"Personalizar loja"</strong></li>
-              <li>📦 Adicione produtos com o botão <strong>"+ Adicionar produto"</strong></li>
-              <li>↕️ Arraste os produtos para reordenar</li>
-              <li>💾 Clique em <strong>"Salvar tudo"</strong> para publicar as alterações</li>
-              <li>🔗 Compartilhe o link do seu catálogo com seus clientes!</li>
+              {[
+                { text: <><strong>Personalize</strong> cores, logo e informações da loja</> },
+                { text: <><strong>Adicione produtos</strong> com fotos, preços e categorias</> },
+                { text: <>Arraste os produtos para <strong>reordená-los</strong></> },
+                { text: <>Clique em <strong>"Salvar tudo"</strong> para publicar as alterações</> },
+                { text: <>Compartilhe o <strong>link do catálogo</strong> com seus clientes</> },
+              ].map((item, i) => (
+                <li key={i}>
+                  <span className={styles.onboardingBullet} aria-hidden="true">
+                    <span className={styles.onboardingBulletIcon}>{Icon.check}</span>
+                  </span>
+                  <span>{item.text}</span>
+                </li>
+              ))}
             </ul>
             <button
               className={styles.authBtn}
-              style={{ marginTop: '1rem' }}
-              onClick={() => {
-                localStorage.setItem('admin_onboarding_seen', 'true')
-                setShowOnboarding(false)
-              }}
+              onClick={() => { localStorage.setItem('admin_onboarding_seen', 'true'); setShowOnboarding(false) }}
             >
-              Entendi!
+              Entendido!
             </button>
           </div>
         </div>

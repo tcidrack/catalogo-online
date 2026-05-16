@@ -71,7 +71,7 @@ export default function StoreClientView({ loja }) {
   if (loading) {
     return (
       <div className={styles.loading}>
-         <div className={styles.loadingDiamond} />
+        <div className={styles.loadingSpinner} />
         <div className={styles.loadingTitle}>{config?.nome || 'Carregando...'}</div>
         <div className={styles.loadingSub}>Carregando catálogo...</div>
       </div>
@@ -103,96 +103,138 @@ export default function StoreClientView({ loja }) {
       <header className={styles.header}>
         <div className={styles.hero}>
           {config?.logo_url && (
-            <img src={config.logo_url} alt="Logo" style={{ height: '80px', maxWidth: '100%', objectFit: 'contain', marginBottom: '1rem' }} />
+            <img
+              src={config.logo_url}
+              alt={`Logo ${config?.nome || loja.nome}`}
+              style={{ height: '72px', maxWidth: '200px', objectFit: 'contain', marginBottom: '0.75rem' }}
+            />
           )}
+          <div className={styles.heroAccent} aria-hidden="true" />
           <h1 className={styles.heroTitle}>{config?.nome || loja.nome}</h1>
           <p className={styles.heroSub}>{config?.slogan || 'Acessórios & Semijoias'}</p>
         </div>
       </header>
 
-       {config?.promo_ativa && config?.promo_texto && (
+      {config?.promo_ativa && config?.promo_texto && (
         <div
           className={styles.promoBanner}
-          style={{
-            background: config.promo_cor || '#4caf50',
-            color: '#fff'
-          }}
+          style={{ background: config.promo_cor || '#4caf50', color: '#fff' }}
+          role="banner"
+          aria-label="Promoção ativa"
         >
           <span className={styles.promoText}>{config.promo_texto}</span>
           <span className={styles.promoBadge}>OFERTA</span>
         </div>
       )}
 
-      <div className={styles.toolbar}>
-        <button className={styles.hamburgerBtn} onClick={() => setMenuOpen(true)} aria-label="Abrir categorias">
-          <span className={styles.hamburgerLine} />
-          <span className={styles.hamburgerLine} />
-          <span className={styles.hamburgerLine} />
+      <div className={styles.toolbar} role="search">
+        <button
+          className={styles.hamburgerBtn}
+          onClick={() => setMenuOpen(true)}
+          aria-label="Abrir menu de categorias"
+          aria-expanded={menuOpen}
+        >
+          <span className={styles.hamburgerLine} aria-hidden="true" />
+          <span className={styles.hamburgerLine} aria-hidden="true" />
+          <span className={styles.hamburgerLine} aria-hidden="true" />
         </button>
         <div className={styles.searchWrap}>
-          <span className={styles.searchIcon}>🔍</span>
+          <svg className={styles.searchIconSvg} viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden="true">
+            <circle cx="9" cy="9" r="6" />
+            <path d="m15 15 3 3" strokeLinecap="round" />
+          </svg>
           <input
-            type="text"
+            type="search"
             className={styles.searchInput}
             placeholder="Buscar produtos..."
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
+            aria-label="Buscar produtos"
           />
           {searchTerm && (
-            <button className={styles.clearSearch} onClick={() => setSearchTerm('')}>✕</button>
+            <button
+              className={styles.clearSearch}
+              onClick={() => setSearchTerm('')}
+              aria-label="Limpar busca"
+            >
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" width="12" height="12" aria-hidden="true">
+                <path d="M3 3l10 10M13 3L3 13" strokeLinecap="round" />
+              </svg>
+            </button>
           )}
         </div>
       </div>
 
       {menuOpen && (
-        <div className={styles.drawerOverlay} onClick={() => setMenuOpen(false)} />
+        <div className={styles.drawerOverlay} onClick={() => setMenuOpen(false)} aria-hidden="true" />
       )}
-      <aside className={`${styles.drawer} ${menuOpen ? styles.drawerOpen : ''}`}>
+      <aside
+        className={`${styles.drawer} ${menuOpen ? styles.drawerOpen : ''}`}
+        aria-label="Menu de categorias"
+        aria-hidden={!menuOpen}
+      >
         <div className={styles.drawerHeader}>
           <h3>Categorias</h3>
-          <button className={styles.drawerClose} onClick={() => setMenuOpen(false)}>✕</button>
+          <button
+            className={styles.drawerClose}
+            onClick={() => setMenuOpen(false)}
+            aria-label="Fechar menu"
+          >
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" width="14" height="14" aria-hidden="true">
+              <path d="M3 3l10 10M13 3L3 13" strokeLinecap="round" />
+            </svg>
+          </button>
         </div>
         <nav className={styles.drawerNav}>
           {categories.map(cat => (
             <button
               key={cat.value}
               className={`${styles.drawerItem} ${activeCategory === cat.value ? styles.drawerActive : ''}`}
-              onClick={() => {
-                setActiveCategory(cat.value)
-                setMenuOpen(false)
-              }}
+              onClick={() => { setActiveCategory(cat.value); setMenuOpen(false) }}
+              aria-current={activeCategory === cat.value ? 'true' : undefined}
             >
+              {activeCategory === cat.value && (
+                <span className={styles.drawerActiveDot} aria-hidden="true" />
+              )}
               {cat.label}
             </button>
           ))}
         </nav>
       </aside>
 
-      <div className={styles.grid}>
+      <main className={styles.grid}>
         {filtered.length === 0 ? (
-          <div className={styles.empty}>Nenhum produto encontrado.</div>
+          <div className={styles.empty}>
+            <div className={styles.emptyIcon} aria-hidden="true">🔍</div>
+            <p>Nenhum produto encontrado.</p>
+          </div>
         ) : (
           filtered.map(p => (
-            <ProductCard 
-              key={p.id} 
-              produto={p} 
+            <ProductCard
+              key={p.id}
+              produto={p}
               mostrarQuantidade={config?.mostrar_quantidade || false}
-              onClick={() => setSelectedProduto(p)} 
+              onClick={() => setSelectedProduto(p)}
             />
           ))
         )}
-      </div>
+      </main>
 
       <footer className={styles.footer}>
         <p>© {config?.nome || loja.nome}</p>
         {config?.instagram && (
-          <a href={`https://instagram.com/${config.instagram.replace('@', '')}`} target="_blank" rel="noopener noreferrer">
+          <a
+            href={`https://instagram.com/${config.instagram.replace('@', '')}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={`Instagram: ${config.instagram}`}
+          >
             {config.instagram}
           </a>
         )}
       </footer>
 
-       {selectedProduto && (
+      {selectedProduto && (
         <Modal
           produto={selectedProduto}
           whatsapp={config?.whatsapp || ''}

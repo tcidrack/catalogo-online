@@ -46,8 +46,8 @@ function StorePageContent({ slug }) {
   if (loading) {
     return (
       <div className={styles.loading}>
-        <div className={styles.loadingDiamond} />
-        <div>Carregando...</div>
+        <div className={styles.loadingSpinner} />
+        <span>Carregando...</span>
       </div>
     )
   }
@@ -57,6 +57,7 @@ function StorePageContent({ slug }) {
       <div className={styles.error}>
         <h2>Erro</h2>
         <p>{error}</p>
+        <a href="/" className={styles.homeLink}>← Voltar ao início</a>
       </div>
     )
   }

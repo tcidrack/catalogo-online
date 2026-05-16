@@ -1,16 +1,37 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
 :root {
-  --gold: #d4af37;
+  --gold: #C9A84C;
   --gold-dark: #b8962e;
-  --gold-light: #f5d87a;
+  --gold-light: #f0d080;
+  --gold-muted: rgba(201, 168, 76, 0.15);
   --rose: #b76e79;
   --rose-dark: #9a5a64;
   --bg: #fafafa;
   --header-bg: #1a1a2e;
   --footer-bg: #1a1a2e;
   --bg-main: #fafafa;
-  --font-main: Arial, sans-serif;
-  --text: #333;
-  --text-light: #666;
+  --font-main: 'Inter', Arial, sans-serif;
+  --text: #1a1a2e;
+  --text-light: #6b7280;
+  --text-muted: #9ca3af;
+  --surface: #ffffff;
+  --surface-2: #f9fafb;
+  --border: #e5e7eb;
+  --border-light: #f3f4f6;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.05);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.10), 0 2px 6px rgba(0,0,0,0.06);
+  --shadow-lg: 0 12px 40px rgba(0,0,0,0.14), 0 4px 12px rgba(0,0,0,0.08);
+  --shadow-gold: 0 4px 20px rgba(201, 168, 76, 0.25);
+  --transition-fast: 150ms ease-out;
+  --transition-base: 220ms ease-out;
+  --transition-slow: 350ms ease-out;
+  --promo-color: #4caf50;
+  --promo-badge-color: #FA098A;
 }
 
 * {
@@ -20,42 +41,50 @@
 }
 
 body {
-  font-family: var(--font-main, Arial, sans-serif);
+  font-family: var(--font-main, 'Inter', Arial, sans-serif);
   background: var(--bg-main, var(--bg));
   color: var(--text);
   line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
+/* Loading screen */
 .loading-screen {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 100vh;
-  background: linear-gradient(135deg, #f8f4e8 0%, #fff 100%);
+  min-height: 100svh;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f1b35 100%);
 }
 
 .loading-title {
-  font-size: 2rem;
-  color: var(--gold-dark);
-  margin-top: 1rem;
-  letter-spacing: 0.2em;
+  font-size: 1.75rem;
+  color: var(--gold);
+  margin-top: 1.25rem;
+  letter-spacing: 0.15em;
   text-transform: uppercase;
+  font-weight: 300;
 }
 
 .loading-sub {
-  color: var(--text-light);
+  color: rgba(255,255,255,0.45);
   margin-top: 0.5rem;
+  font-size: 0.9rem;
+  letter-spacing: 0.05em;
 }
 
+/* Error screen */
 .error-screen {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 100vh;
+  min-height: 100svh;
   padding: 2rem;
   text-align: center;
+  background: var(--bg-main);
 }
 
 .error-icon {
@@ -64,24 +93,57 @@ body {
 
 .error-title {
   font-size: 1.5rem;
-  color: #c00;
+  color: #dc2626;
   margin-top: 1rem;
+  font-weight: 600;
 }
 
 .error-msg {
   color: var(--text-light);
   margin-top: 0.5rem;
+  max-width: 400px;
 }
 
 .error-hint {
-  color: var(--text-light);
+  color: var(--text-muted);
   font-size: 0.875rem;
   margin-top: 0.5rem;
 }
 
 code {
-  background: #eee;
-  padding: 0.2em 0.4em;
-  border-radius: 3px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  padding: 0.2em 0.5em;
+  border-radius: 6px;
   font-size: 0.875em;
+  font-family: 'Courier New', monospace;
+}
+
+/* Focus ring — cor fixa para não ser afetada pela personalização da loja */
+:focus-visible {
+  outline: 2px solid #C9A84C;
+  outline-offset: 2px;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }
