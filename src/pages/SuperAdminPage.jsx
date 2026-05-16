@@ -123,8 +123,19 @@ export default function SuperAdminPage() {
     if (!deleteTarget) return
     const { id, nome, slug } = deleteTarget
     try {
-      const { error } = await supabase.functions.invoke('delete-store', { body: { lojaId: id, slug } })
-      if (error) throw error
+      const { data, error } = await supabase.functions.invoke('delete-store', { body: { lojaId: id, slug } })
+      if (error) {
+        let details = ''
+        try {
+          if (error.context) {
+            details = await error.context.text()
+            const parsed = JSON.parse(details)
+            details = parsed.error || parsed.message || details
+          }
+        } catch (e) { /* ignore */ }
+        throw new Error(details || error.message)
+      }
+      if (!data?.success) throw new Error(data?.error || 'Erro desconhecido')
       setMessageType('ok')
       setMessage(`Loja "${nome}" removida`)
       reload()

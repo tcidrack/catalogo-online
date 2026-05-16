@@ -26,7 +26,11 @@ serve(async (req) => {
     if (authError || !user) throw new Error('Unauthorized')
 
     // Verify super admin role
-    if (user.app_metadata?.role !== 'super_admin') {
+    const superAdminEmail = Deno.env.get('SUPER_ADMIN_EMAIL')
+    const isSuperAdmin =
+      user.app_metadata?.role === 'super_admin' ||
+      (superAdminEmail && user.email === superAdminEmail)
+    if (!isSuperAdmin) {
       throw new Error('Forbidden: Insufficient permissions')
     }
 

@@ -144,7 +144,7 @@ export default function StoreClientView({ loja }) {
             <path d="m15 15 3 3" strokeLinecap="round" />
           </svg>
           <input
-            type="search"
+            type="text"
             className={styles.searchInput}
             placeholder="Buscar produtos..."
             value={searchTerm}
